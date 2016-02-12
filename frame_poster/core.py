@@ -39,7 +39,7 @@ def extract_movie_length(movie_filepath):
     return datetime.timedelta(hours=int(parts[0]), minutes=int(parts[1]), seconds=int(parts[2])).seconds
 
 
-def doit(movie_filepath, thumbnail_width, seconds_increment, frames_per_row, output_filename):
+def doit(movie_filepath, thumbnail_width, seconds_increment, frames_per_row, output_filename, estimate=False):
     # get length of movie (for approximate progress bar)
     movie_length = extract_movie_length(movie_filepath)
 
@@ -70,6 +70,11 @@ def doit(movie_filepath, thumbnail_width, seconds_increment, frames_per_row, out
             # remove the source bitmap (for disk space)
             os.remove(filename)
 
+            # when estimating we only need one frame
+            if estimate:
+                prntr.progressf(100, 1, 100)
+                break
+
             # display a nice progress bar
             i += 1
             prntr.progressf(i, seconds_increment, movie_length)
@@ -77,6 +82,16 @@ def doit(movie_filepath, thumbnail_width, seconds_increment, frames_per_row, out
 
         # end progress bar
         prntr.close()
+
+    if estimate:
+        # estimate final poster size and exit
+        output_width = thumbnail_width * frames_per_row
+        output_height = (frames[0].size[1] * movie_length / frames_per_row) + (round(frames[0].size[1] / 3) * ((movie_length / frames_per_row) + 1))
+
+        prntr.p('Estimated image size is {}x{} pixels, or {:.2f}" x {:.2f}" at 300 dpi'.format(
+            output_width, round(output_height), output_width / 300, output_height / 300
+        ))
+        return
 
     # rearrange frames into columns and rows
     frames_by_row = [[]]

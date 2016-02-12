@@ -41,6 +41,10 @@ def parse_command_line():
     )
 
     parser.add_argument(
+        '-E', '--estimate', action='store_true',
+        help="Don't create a poster; just estimate its final size"
+    )
+    parser.add_argument(
         '-w', '--thumbnail-width', default=THUMBNAIL_SIZE, type=int,
         help='The width of each thumbnail in the output image (default is {}px)'.format(THUMBNAIL_SIZE)
     )
@@ -72,4 +76,5 @@ def main(args):
         args.seconds_between_frames,
         args.frames_per_row,
         args.output_name,
+        estimate=args.estimate,
     )
