@@ -88,8 +88,8 @@ def doit(movie_filepath, thumbnail_width, seconds_increment, frames_per_row, out
         output_width = thumbnail_width * frames_per_row
         output_height = (frames[0].size[1] * movie_length / frames_per_row) + (round(frames[0].size[1] / 3) * ((movie_length / frames_per_row) + 1))
 
-        prntr.p('Estimated image size is {}x{} pixels, or {:.2f}" x {:.2f}" at 300 dpi'.format(
-            output_width, round(output_height), output_width / 300, output_height / 300
+        prntr.p('Estimated image size is {}x{} pixels, or {:.2f}x{:.2f} cm at 300 dpi'.format(
+            output_width, round(output_height), output_width / 300 * 2.54, output_height / 300 * 2.54
         ))
         return
 
@@ -118,8 +118,8 @@ def doit(movie_filepath, thumbnail_width, seconds_increment, frames_per_row, out
     output_height = (thumbnail_height * len(frames_by_row)) + (round(thumbnail_height / 3) * (len(frames_by_row) + 1))
 
     # interesting info
-    prntr.p('Output image is {}x{} pixels, or {:.2f}" x {:.2f}" at 300 dpi'.format(
-        output_width, output_height, output_width / 300, output_height / 300
+    prntr.p('Output image is {}x{} pixels, or {:.2f}x{:.2f} cm at 300 dpi'.format(
+        output_width, output_height, output_width / 300 * 2.54, output_height / 300 * 2.54
     ))
 
     # create the final output image
