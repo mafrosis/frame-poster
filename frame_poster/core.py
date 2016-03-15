@@ -85,6 +85,11 @@ def doit(movie_filepath, thumbnail_width, seconds_increment, frames_per_row, out
         prntr.close()
 
     if estimate:
+        prntr.p('Movie length: {}'.format(movie_length))
+        prntr.p('Frame dimensions: {}x{} pixels, or {:.2f}x{:.2f} cm at 300 dpi'.format(
+            frames[0].size[0], frames[0].size[1], frames[0].size[0] / 300 * 2.54, frames[0].size[1] / 300 * 2.54
+        ))
+
         # estimate final poster size and exit
         output_width = thumbnail_width * frames_per_row
         output_height = (frames[0].size[1] * movie_length / frames_per_row) + (round(frames[0].size[1] / 3) * ((movie_length / frames_per_row) + 1))
