@@ -143,7 +143,9 @@ def doit(movie_filepath, thumbnail_width, seconds_increment, frames_per_row, out
                 # end of frames
                 break
 
-    prntr.p('Output file written to {}/{}'.format(os.path.dirname(os.path.abspath(__file__)), output_filename))
+    # handle relative and absolute output filepaths
+    output_filename = os.path.abspath(output_filename)
+    prntr.p('Output file written to {}'.format(output_filename))
 
     # write the output file
     output.save(output_filename, dpi=(300,300))
