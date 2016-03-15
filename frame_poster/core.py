@@ -6,6 +6,7 @@ import subprocess
 import shutil
 import tempfile
 
+import cv2
 from PIL import Image, ImageStat
 
 from . import printer
@@ -50,6 +51,9 @@ def doit(movie_filepath, thumbnail_width, seconds_increment, frames_per_row, out
     current_row = i = seconds = 0
 
     prntr.progressf(0, 1, movie_length)
+
+    # discover bounds of crop rectangle (removes black borders etc)
+    crop_rectangle = _get_crop_rectangle(movie_filepath)
 
     with make_temp_directory() as tmpdir:
         while True:
@@ -180,6 +184,48 @@ def _is_above_percieved_brightness(im, threshold=50):
 
     #print('{}  {}'.format(seconds, pbrightness))
     return (pbrightness >= threshold)
+
+
+def _get_crop_rectangle(movie_filepath, prntr):
+    thresholds = []
+    seconds = 60
+    i = 0
+
+    # find black borders
+    with make_temp_directory() as tmpdir:
+        for i in range(40):
+            # extract a frame 30 seconds into the movie
+            filename = extract_frame(movie_filepath, tmpdir, seconds)
+
+            # read image and convert to greyscale
+            img = cv2.imread(filename)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+            thresholds.append(gray)
+            seconds += 60
+
+            i += 1
+            #prntr.progressf(i, progress_increment, movie_length)
+
+    combined = thresholds[0]
+    for t in thresholds[1:]:
+        combined = cv2.addWeighted(combined, 0.5, t, 0.5, 0)
+
+    cv2.imwrite('output.bmp', combined)
+    import ipdb; ipdb.set_trace()
+    _, thresh = cv2.threshold(combined, 5, 255, cv2.THRESH_BINARY)
+    cv2.imwrite('output.bmp', thresh)
+    import ipdb; ipdb.set_trace()
+
+    # find contours
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if contours:
+        x, y, w, h = cv2.boundingRect(contours[0])
+
+        # write a cropped image
+        cv2.imwrite('output.bmp', img[y:y+h, x:x+w])
+
+    return (x, y, x+w, y+h)
 
 
 @contextlib.contextmanager
