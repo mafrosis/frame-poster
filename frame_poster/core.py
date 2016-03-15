@@ -21,10 +21,8 @@ def extract_frame(movie_filepath, tmpdir, seconds):
     subprocess.check_call(
         "ffmpeg -ss {} -i '{}' -frames:v 1 {} &>/dev/null".format(ts, movie_filepath, filename), shell=True
     )
-    if not os.path.exists(filename):
-        return None
-
-    return filename
+    if os.path.exists(filename):
+        return filename
 
 
 def extract_movie_length(movie_filepath):
