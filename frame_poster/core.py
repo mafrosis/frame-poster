@@ -1,11 +1,12 @@
 import contextlib
 import datetime
+import math
 import os
 import subprocess
 import shutil
 import tempfile
 
-from PIL import Image
+from PIL import Image, ImageStat
 
 from . import printer
 
@@ -147,6 +148,38 @@ def doit(movie_filepath, thumbnail_width, seconds_increment, frames_per_row, out
 
     # write the output file
     output.save(output_filename, dpi=(300,300))
+
+
+def _strip_intro_outro(frames):
+    start_frame = 0
+    end_frame = len(frames)
+
+    # iterate from start of movie forwards, finding frame where brightness goes above threshold
+    for i in range(10):
+        if not _is_above_percieved_brightness(frames[i], 100):
+            start_frame = i
+        else:
+            break
+
+    # iterate from end of movie backwards, finding frame where brightness goes above threshold
+    for i in reversed(range(len(frames)-10, len(frames))):
+        if not _is_above_percieved_brightness(frames[i], 100):
+            end_frame = i
+        else:
+            break
+
+    # slice frames from start and end
+    frames[:] = frames[start_frame:end_frame]
+
+
+def _is_above_percieved_brightness(im, threshold=50):
+    # http://stackoverflow.com/a/3498247/425050
+    stat = ImageStat.Stat(im)
+    r,g,b = stat.rms
+    pbrightness = math.sqrt(0.241*(r**2) + 0.691+(g**2) + 0.068*(b**2))
+
+    #print('{}  {}'.format(seconds, pbrightness))
+    return (pbrightness >= threshold)
 
 
 @contextlib.contextmanager
