@@ -31,6 +31,9 @@ def extract_movie_length(movie_filepath):
         "ffprobe '{}' 2>&1 | awk '/Duration/ {{print $2}}'".format(movie_filepath), shell=True
     ).decode('utf8')
 
+    if not output:
+        raise Exception('Failed calling ffprobe!')
+
     length = output.strip()[0:-4].format(':')
     parts = length.split(':')
 
